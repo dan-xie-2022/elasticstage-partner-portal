@@ -177,35 +177,31 @@ API Gateway / BFF layer  ←  stable versioned contract (what the playground dem
 
 ## 7. What we would build next (beyond prototype)
 
-Organised by the platform roadmap (Foundation → Embedded partnerships → AI & agents).
+Ordered by dependency — nothing lower in the list can ship without the items above it being in place.
 
-### Foundation — shared infra
+1. **Real OAuth 2.0 flow** — the critical unblocking dependency. Everything else requires real partner identity: revenue attribution, audit trails, sandbox credentials, SDK auth. The prototype only demonstrates this; nothing goes to production without it.
 
-1. **Real OAuth 2.0 flow** — replace the mock API key with a proper client credentials handshake. Auth & identity is a Now item on the roadmap; the prototype only demonstrates it.
-2. **Event model implementation** — the `order.created { partner_id }` pipeline shown in the architecture needs real implementation: event bus, fan-out to revenue share attribution, partner webhooks, and analytics.
-3. **Real webhook delivery** — turning a partner from "experimenting" to "committed" requires events actually flowing to their backend. Includes HMAC-SHA256 signing, retry logic, and delivery logs.
-4. **SDK publishing** — the `@elasticstage/sdk` fictional package becomes real (Node.js and Python to start).
-5. **Sandbox environment** — a live, isolated environment partners point their own code at before going to production. The API Playground demonstrates the API surface; a sandbox lets partners run their actual integration code against real infrastructure safely.
-6. **Server-side HITL enforcement** — `confirmed: true` on `POST /releases/{id}/attach` is currently only validated in the UI. The backend must enforce it with an audit trail (who confirmed, when, via which partner).
-7. **AI & Agent infrastructure** — the shared infra layer required before any agentic flow can ship (Next on the roadmap): LLM orchestration, tool call routing, agent session management.
-8. **Localisation** — multi-language and multi-currency support for non-UK partners (Later on the roadmap).
+2. **Server-side HITL enforcement** — must be in place before any real release can be attached. `confirmed: true` is currently UI-only. The backend needs to validate it, log who confirmed, when, and via which partner. Safety gate before any commercial action is real.
 
-### Embedded partnerships
+3. **Event model implementation** — the `order.created { partner_id }` pipeline shown in the architecture. Needed before webhooks, revenue share, or billing attribution can function. Everything downstream depends on events being reliably produced and routed.
 
-9. **Self-serve partner onboarding** — the portal currently assumes an existing partner with credentials. A new partner (e.g. Beatport) needs a signup flow, API agreement acceptance, and automatic credential generation — without talking to anyone at elasticStage. This is the structural change that makes partner #10 cost as much as partner #2.
-10. **Stripe Connect-style revenue share settlement** — automated payouts to partners, not just reporting. Turns the dashboard from a vanity metric into a financial commitment.
-11. **Post-publish editing UI in the embed widget** — `PATCH /releases/{id}` exists in the API but the embed widget has no "manage release" path. A creator who published through SoundCloud can't update their release date through the widget.
-12. **Creator billing handoff** — when a creator first uses the embed on SoundCloud, they need to set up a billing relationship with elasticStage. This transition is currently unmodelled.
-13. **Mobile SDK** — iframe embeds don't work in native apps. A React Native / Flutter SDK is needed for mobile-first partners (Later on the roadmap, flagged in section 3.8).
-14. **1.2 Creation tool partnerships** — after Distributor (SoundCloud, Amuse), onboard creation tools: Suno (~2M paid subscribers), Splice. Same API, different embed context.
-15. **1.3 Streaming partnerships** — Spotify for Artists, YouTube creator tools (Later on the roadmap).
-16. **1.4 E-commerce partnerships** — Bandcamp, Beatport — artists already selling direct to fans (Later on the roadmap).
+4. **Real webhook delivery** — depends on the event model. Turns partner integrations from read-only to reactive — SoundCloud's backend gets notified when a creator places an order. Includes HMAC-SHA256 signing, retry logic (3 attempts, exponential backoff), and delivery logs in the dashboard.
 
-### AI & agents
+5. **Creator billing handoff** — depends on OAuth (creator identity) and the event model (billing triggers). When a creator first uses the embed on SoundCloud, they need to set up a billing relationship with elasticStage. Currently unmodelled — this is the moment the embed either converts or loses the creator.
 
-17. **2.1 Agentic release flow** — the conversational 3-message release creation flow deliberately excluded from this prototype. Next on the roadmap; rides the same API endpoints.
-18. **2.2 AI fan store** — AI-powered discovery and purchasing on the fan side (Later on the roadmap).
-19. **2.3 External MCP** — exposing elasticStage tools to external AI agents (ChatGPT, Claude) via the Model Context Protocol, so any agent can orchestrate a release without a bespoke integration (Later on the roadmap).
+6. **Stripe Connect-style revenue share settlement** — depends on OAuth + event model. Automated payouts to partners, not just reporting. Turns the Partner Dashboard from a vanity metric into a financial commitment that makes the partnership sticky.
+
+7. **Sandbox environment** — depends on OAuth being real. Partners need a live, isolated environment to point their own code at before going to production. The API Playground shows the surface; the sandbox lets them run their actual integration safely.
+
+8. **SDK publishing** — depends on OAuth + sandbox. The `@elasticstage/sdk` package becomes real (Node.js and Python first). Without a sandbox and real auth, the SDK has nowhere meaningful to point.
+
+9. **Self-serve partner onboarding** — depends on OAuth + sandbox + SDK. A new partner needs a signup flow, API agreement acceptance, and automatic credential generation without talking to anyone at elasticStage. This is the structural change that makes partner #10 cost the same as partner #2.
+
+10. **Post-publish editing UI in the embed widget** — relatively independent once OAuth is in place. `PATCH /releases/{id}` exists in the API but the embed widget has no "manage release" path. A creator who published through SoundCloud cannot update their release date through the widget.
+
+11. **Mobile SDK** — depends on OAuth + SDK publishing. iframe embeds don't work in native apps. A React Native / Flutter SDK wraps the same REST API for mobile-first partners.
+
+12. **Localisation** — depends on the full stack being stable. Multi-language and multi-currency support for non-UK partners. Last item on the roadmap for good reason — everything else must work first.
 
 ---
 
