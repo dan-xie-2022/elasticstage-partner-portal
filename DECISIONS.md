@@ -78,7 +78,25 @@ A **developer-facing prototype** demonstrating how a music partner (SoundCloud) 
 
 ---
 
-### 3.7 Excluded: AI conversational flow inside the embed widget
+### 3.7 Integration modes: iframe is one path, not the only path
+**Decision:** The prototype demonstrates the iframe embed as the primary integration mode, but the architecture is designed to support three distinct modes.
+**Why:** Different partners have fundamentally different stacks. An iframe that works for SoundCloud (web) breaks silently on a mobile-native app and may be blocked by strict CSP policies on enterprise tools.
+
+**Three integration modes the API supports:**
+
+| Mode | How | Best for |
+|---|---|---|
+| **Iframe embed** | One `<iframe>` tag with URL params for theming | Web-based partners (SoundCloud, Bandcamp) — zero integration effort |
+| **Headless API** | Partner builds their own UI, calls REST endpoints directly | Partners who want full UI control or have their own design system |
+| **Mobile SDK** | Native wrapper around the REST API | Mobile-first partners (future — React Native, Flutter, iOS, Android) |
+
+**What the prototype shows:** The iframe path (Screen 3) and the headless path (the API Playground already demonstrates direct API calls). Mobile SDK is future work.
+
+**Gap acknowledged:** iframes don't work in native mobile apps, and some enterprise partners enforce CSP policies that block third-party iframes. The REST API being the common foundation means any partner can always fall back to the headless mode regardless of their stack.
+
+---
+
+### 3.8 Excluded: AI conversational flow inside the embed widget
 **Decision:** The embed widget (Screen 3) shows a form-based 5-step release flow only. No chat/agentic interface.
 **Why:** The agentic demo is a separate priority (Priority 2). Including it in this prototype:
 - Blurs the story — the demo is about the partnership/API DX, not AI
@@ -89,7 +107,7 @@ A **developer-facing prototype** demonstrating how a music partner (SoundCloud) 
 
 ---
 
-### 3.8 Payment not modelled
+### 3.9 Payment not modelled
 **Decision:** No payment endpoints in the playground.
 **Why:** Payment is between the creator and elasticStage directly — the partner (SoundCloud) never handles or touches payment. Revenue share to SoundCloud is tracked via `partner_id` on the order record and shown in the dashboard. The gap (creator needing to set up billing with elasticStage the first time) is acknowledged verbally in the demo as a known edge case.
 
