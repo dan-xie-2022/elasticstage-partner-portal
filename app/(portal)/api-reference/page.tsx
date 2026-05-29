@@ -65,6 +65,7 @@ const ENDPOINT_GROUPS = [
     endpoints: [
       { method: "GET",    path: "/releases",                    description: "List all releases attributed to this partner" },
       { method: "GET",    path: "/releases/{id}",               description: "Get full detail for a specific release" },
+      { method: "PATCH",  path: "/releases/{id}",               description: "Update mutable fields on a live release (release_date, price_tier, territory)" },
       { method: "DELETE", path: "/releases/{id}",               description: "Delete a draft release (draft status only)" },
     ],
   },
@@ -107,7 +108,7 @@ const ERROR_CODES = [
   { status: 400, code: "rights_holders_identical",     meaning: "℗ holder and © holder cannot be the same value",    fix: "℗ and © are legally distinct — provide separate values" },
   { status: 401, code: "invalid_token",                meaning: "Access token is missing or expired",                 fix: "Re-authenticate via POST /auth/token" },
   { status: 403, code: "partner_scope_denied",         meaning: "Token lacks permission for this endpoint",           fix: "Check OAuth scopes on your client credentials" },
-  { status: 409, code: "release_already_live",         meaning: "Cannot modify a live release",                       fix: "attach is irreversible — create a new release" },
+  { status: 409, code: "release_already_live",         meaning: "Cannot modify immutable fields on a live release",   fix: "Use PATCH /releases/{id} for mutable fields (release_date, price_tier, territory). Format, tracks, and EAN are permanently locked." },
   { status: 422, code: "invalid_price_tier",           meaning: "Price tier must be low, medium, or high",            fix: "Creators pick a tier, not a price — three fixed values only" },
   { status: 429, code: "rate_limit_exceeded",          meaning: "Exceeded 1,000 requests / minute",                   fix: "Back off and retry after the Retry-After header value" },
 ];

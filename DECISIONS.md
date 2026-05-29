@@ -78,7 +78,26 @@ A **developer-facing prototype** demonstrating how a music partner (SoundCloud) 
 
 ---
 
-### 3.7 Integration modes: iframe is one path, not the only path
+### 3.7 Post-publish mutability: some fields remain editable after attach
+**Decision:** `POST /releases/{id}/attach` locks the physical product attributes permanently, but certain commercial and metadata fields remain editable via a separate `PATCH /releases/{id}` endpoint.
+
+**Immutable after publish** (affects manufacturing or commercial identity):
+- `format` — vinyl / CD spec drives the physical production process
+- `tracks` and `artwork` — the physical product is already defined
+- `ean` — commercial barcode; changing it post-publish breaks downstream retail records
+
+**Mutable after publish** (commercial and discoverability metadata):
+- `release_date` — creators announce early and frequently push dates; locking this causes real creator friction
+- `price_tier` — creators need to respond to market conditions
+- `territory` — expanding distribution should not require a new release
+- `description` — copy and marketing text, no physical impact
+
+**Why a separate endpoint:** Using the same `PATCH /releases/{id}/metadata` pre- and post-publish would require complex field-level validation logic and risks confusing partners about what's allowed when. A dedicated `PATCH /releases/{id}` that only exposes mutable fields is clearer and safer — the API surface communicates the rule.
+
+---
+
+### 3.8 Integration modes: iframe is one path, not the only path
+
 **Decision:** The prototype demonstrates the iframe embed as the primary integration mode, but the architecture is designed to support three distinct modes.
 **Why:** Different partners have fundamentally different stacks. An iframe that works for SoundCloud (web) breaks silently on a mobile-native app and may be blocked by strict CSP policies on enterprise tools.
 
@@ -96,7 +115,7 @@ A **developer-facing prototype** demonstrating how a music partner (SoundCloud) 
 
 ---
 
-### 3.8 Excluded: AI conversational flow inside the embed widget
+### 3.9 Excluded: AI conversational flow inside the embed widget
 **Decision:** The embed widget (Screen 3) shows a form-based 5-step release flow only. No chat/agentic interface.
 **Why:** The agentic demo is a separate priority (Priority 2). Including it in this prototype:
 - Blurs the story — the demo is about the partnership/API DX, not AI
@@ -107,7 +126,7 @@ A **developer-facing prototype** demonstrating how a music partner (SoundCloud) 
 
 ---
 
-### 3.9 Payment not modelled
+### 3.10 Payment not modelled
 **Decision:** No payment endpoints in the playground.
 **Why:** Payment is between the creator and elasticStage directly — the partner (SoundCloud) never handles or touches payment. Revenue share to SoundCloud is tracked via `partner_id` on the order record and shown in the dashboard. The gap (creator needing to set up billing with elasticStage the first time) is acknowledged verbally in the demo as a known edge case.
 
@@ -176,3 +195,4 @@ API Gateway / BFF layer  ←  stable versioned contract (what the playground dem
 | 2026-05-29 | Decision: dual auth story — API key (test) + OAuth 2.0 (production). |
 | 2026-05-29 | Decision: payment not modelled; acknowledge verbally in walkthrough. |
 | 2026-05-29 | Prototype deployed to Vercel: https://elasticstage-partner-portal.vercel.app |
+| 2026-05-29 | Decision: post-publish mutability — added PATCH /releases/{id} for mutable fields (release_date, price_tier, territory). Format, tracks, EAN permanently locked. |
