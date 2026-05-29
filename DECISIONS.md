@@ -172,6 +172,8 @@ API Gateway / BFF layer  ←  stable versioned contract (what the playground dem
 1. **Screen 4 (Partner Dashboard)** — revenue reporting is important but doesn't validate the core DX question. Screens 2 and 3 carry the story.
 2. **Python/curl code snippets** — keep Node.js only if pressed for time.
 3. **Live theme customiser** — could show a static SoundCloud-branded widget instead of the dynamic colour picker.
+4. **Widget Preview page (Screen 3)** — the mock SoundCloud page with the iframe embed is a visual demo, not a technical one. The API Playground (Screen 2) already demonstrates the headless integration path, which is the core DX story. The iframe embed can be explained verbally; the headless model should be kept as it directly shows the API contract.
+5. **Mobile SDK integration** — iframe embeds cover the majority of web-based partners. Mobile SDK is a later-stage concern and adds significant build complexity for limited demo value. The headless API model covers any stack in the interim.
 
 ---
 
@@ -201,7 +203,6 @@ Ordered by dependency — nothing lower in the list can ship without the items a
 
 11. **Mobile SDK** — depends on OAuth + SDK publishing. iframe embeds don't work in native apps. A React Native / Flutter SDK wraps the same REST API for mobile-first partners.
 
-12. **Localisation** — depends on the full stack being stable. Multi-language and multi-currency support for non-UK partners. Last item on the roadmap for good reason — everything else must work first.
 
 ---
 

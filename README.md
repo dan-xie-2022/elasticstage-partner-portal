@@ -94,7 +94,12 @@ No environment variables required — all data is mocked.
 
 ## What I would cut, build next, and test first
 
-**Cut first:** Partner Dashboard (Screen 4) — revenue reporting is important but doesn't validate the core DX question. Screens 2 and 3 carry the story.
+**Cut first (in order):**
+1. **Partner Dashboard (Screen 4)** — revenue reporting doesn't validate the core DX question. Screens 2 and 3 carry the story.
+2. **Python/cURL code snippets** — keep Node.js only if pressed for time.
+3. **Live theme customiser** — replace with a static SoundCloud-branded widget; the colour picker is a nice-to-have.
+4. **Widget Preview page (Screen 3)** — the mock SoundCloud iframe is a visual demo, not a technical one. The API Playground already demonstrates the headless integration path, which is the real DX story. Keep headless, cut the iframe preview.
+5. **Mobile SDK integration** — iframe covers the majority of web partners. Mobile SDK adds significant build complexity for limited demo value; the headless API model covers any stack in the interim.
 
 **Build next (in dependency order):**
 
