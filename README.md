@@ -32,13 +32,18 @@ The embed widget (`/embed`) is a standalone page loaded inside the iframe on Scr
 
 ## Key product decisions
 
-Full rationale in [DECISIONS.md](./DECISIONS.md). Highlights:
+Full rationale in [DECISIONS.md](./DECISIONS.md). Summary:
 
-- **SoundCloud as the named partner** — existing relationship, makes the demo concrete rather than hypothetical
-- **No AI/agentic flow in the embed** — the core story is the partnership DX; the "same API serves both form and LLM" point is made verbally, not by building a second UI
-- **Dual auth model** — API key for testing shown on Screen 1, OAuth 2.0 client credentials called out as the production requirement
-- **Full API surface visible, not all interactive** — Auth / Creators / Orders / Webhooks groups are shown greyed-out in the playground to signal product maturity without over-building the prototype
-- **HITL gate on attach** — `POST /releases/{id}/attach` is flagged as irreversible throughout; the embed widget requires an explicit creator checkbox before the publish button activates
+- **SoundCloud as the named partner** — existing elasticStage relationship; using a real partner makes the demo concrete rather than hypothetical. DistroKid and Amuse are valid alternatives but less proven.
+- **Dual auth model** — API key for testing (shown on Screen 1), OAuth 2.0 client credentials for production server-to-server calls. API keys are static and unsafe for production; OAuth tokens expire and rotate automatically.
+- **HITL gate on attach** — `POST /releases/{id}/attach` is flagged as irreversible throughout. The embed widget requires an explicit creator confirmation checkbox before the publish button activates. The API should also enforce `confirmed: true` server-side in production.
+- **Full API surface visible, not all interactive** — Release Lifecycle endpoints (9) are fully interactive. Auth, Creators, Orders, and Webhooks groups are visible but greyed-out, signalling product maturity without over-building the prototype.
+- **Stripe-pattern code snippets** — each endpoint shows a live-updating code snippet in Node.js / cURL / Python using a fictional `@elasticstage/sdk`. A developer can go from API key to working code in under 5 minutes.
+- **Widget theming via URL parameters** — the embed reads `?partner=soundcloud&color=%23FF5500` and applies the brand colour as a CSS variable. The theme customiser on Screen 3 updates the iframe src in real-time.
+- **Post-publish mutability** — `attach` locks physical product attributes permanently (format, tracks, EAN). Commercial metadata (release_date, price_tier, territory, description) remains editable via a separate `PATCH /releases/{id}` endpoint, avoiding a dedicated endpoint causes field-level confusion.
+- **Three integration modes** — iframe embed (web, zero effort), headless API (full UI control), mobile SDK (future). The REST API is the common foundation; iframe is one presentation layer, not the only path.
+- *(Excluded)* **AI conversational flow** — the agentic demo is a separate priority. The "same API serves both form and LLM" point is made verbally in the walkthrough.
+- *(Excluded)* **Payment endpoints** — payment is between creator and elasticStage directly; the partner never handles it. Revenue share is tracked via `partner_id` and shown in the dashboard.
 
 ---
 
