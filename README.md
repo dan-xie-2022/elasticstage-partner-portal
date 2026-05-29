@@ -96,6 +96,13 @@ No environment variables required — all data is mocked.
 
 **Cut first:** Partner Dashboard (Screen 4) — revenue reporting is important but doesn't validate the core DX question. Screens 2 and 3 carry the story.
 
-**Build next:** Real webhook delivery + OAuth 2.0 flow — these are what turn a partner from "experimenting" to "committed."
+**Build next (in dependency order):**
+
+1. **Real OAuth 2.0 flow** — nothing goes to production without real partner identity. Every item below depends on it.
+2. **Server-side HITL enforcement** — `confirmed: true` on attach must be validated and audited server-side before any real commercial action is possible.
+3. **Event model** — the `order.created { partner_id }` pipeline is the backbone of webhooks, revenue attribution, and billing. Everything downstream depends on it.
+4. **Real webhook delivery** — what turns a partner from "experimenting" to "committed". Events flowing to SoundCloud's backend make the integration sticky.
+
+Full dependency-ordered build list (12 items) in [DECISIONS.md → Section 7](./DECISIONS.md).
 
 **Test first:** Embed take-rate on SoundCloud — do creators actually click through and complete a release? Modelled at ~5% activation. Validate with a lightweight embed on one existing partner page before building the full self-serve portal.
