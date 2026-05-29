@@ -35,21 +35,16 @@ A **developer-facing prototype** demonstrating how a music partner (SoundCloud) 
 
 ---
 
-### 3.2 Excluded: AI conversational flow inside the embed widget
-**Decision:** The embed widget (Screen 3) shows a form-based 5-step release flow only. No chat/agentic interface.
-**Why:** The brief (Section 9) notes the agentic demo as a separate priority (Priority 2). Including it in this prototype:
-- Blurs the story — the demo is about the partnership/API DX, not AI
-- Adds build complexity for no additional validation value
-- The "same API serves both form and LLM" point can be made verbally in the walkthrough
-
-**Tradeoff:** Slightly less visually novel, but cleaner product narrative.
-
----
-
-### 3.3 Auth: API key for testing + OAuth 2.0 for production
+### 3.2 Auth: API key for testing + OAuth 2.0 for production
 **Decision:** Screen 1 shows an API key with a clear note pointing to OAuth 2.0 client credentials for production server-to-server calls.
 **Why:** API keys alone are not production-safe — they're static, don't expire, and have no granular scope. OAuth client credentials is the right long-run pattern (SoundCloud's backend exchanges `client_id`/`client_secret` for a short-lived `access_token`).
 **What we show:** Both exist. API key = developer testing. OAuth = production. Both greyed out in the playground sidebar (non-interactive) but explained in Screen 1's context.
+
+---
+
+### 3.3 HITL gate on the Attach step
+**Decision:** The `POST /releases/{id}/attach` step in both the embed form and the API playground explicitly flags this as an irreversible commercial action requiring creator confirmation.
+**Why:** The brief explicitly calls this out as a "natural HITL gate". Whether the caller is a form, a partner embed, or an AI agent, the irreversible commercial action should always require explicit confirmation. Naming this signals product maturity.
 
 ---
 
@@ -77,21 +72,26 @@ A **developer-facing prototype** demonstrating how a music partner (SoundCloud) 
 
 ---
 
-### 3.6 Payment not modelled
-**Decision:** No payment endpoints in the playground.
-**Why:** Payment is between the creator and elasticStage directly — the partner (SoundCloud) never handles or touches payment. Revenue share to SoundCloud is tracked via `partner_id` on the order record and shown in the dashboard. The gap (creator needing to set up billing with elasticStage the first time) is acknowledged verbally in the demo as a known edge case.
-
----
-
-### 3.7 Widget theming via URL parameters
+### 3.6 Widget theming via URL parameters
 **Decision:** The embed widget reads `?partner=soundcloud&color=%23FF5500` from URL params and applies the partner's brand colour as a CSS custom property.
 **Why:** Clean iframe-based white-labelling. The theme customiser on Screen 3 updates the iframe src in real-time, giving a compelling live demo of the white-label capability without any backend configuration.
 
 ---
 
-### 3.8 HITL gate on the Attach step
-**Decision:** The `POST /releases/{id}/attach` step in both the embed form and the API playground explicitly flags this as an irreversible commercial action requiring creator confirmation.
-**Why:** The brief explicitly calls this out (Section 2: "natural HITL gate"). Whether the caller is a form, a partner embed, or an AI agent, the irreversible commercial action should always require explicit confirmation. Naming this signals product maturity.
+### 3.7 Excluded: AI conversational flow inside the embed widget
+**Decision:** The embed widget (Screen 3) shows a form-based 5-step release flow only. No chat/agentic interface.
+**Why:** The agentic demo is a separate priority (Priority 2). Including it in this prototype:
+- Blurs the story — the demo is about the partnership/API DX, not AI
+- Adds build complexity for no additional validation value
+- The "same API serves both form and LLM" point can be made verbally in the walkthrough
+
+**Tradeoff:** Slightly less visually novel, but cleaner product narrative.
+
+---
+
+### 3.8 Payment not modelled
+**Decision:** No payment endpoints in the playground.
+**Why:** Payment is between the creator and elasticStage directly — the partner (SoundCloud) never handles or touches payment. Revenue share to SoundCloud is tracked via `partner_id` on the order record and shown in the dashboard. The gap (creator needing to set up billing with elasticStage the first time) is acknowledged verbally in the demo as a known edge case.
 
 ---
 
