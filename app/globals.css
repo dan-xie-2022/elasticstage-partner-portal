@@ -1,26 +1,52 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --es-bg: #0a0a0a;
+  --es-surface: #111111;
+  --es-card: #1a1a1a;
+  --es-border: #262626;
+  --es-primary: #e84d1b;
+  --es-primary-hover: #d43d0e;
+  --es-text: #fafafa;
+  --es-muted: #737373;
+  --es-code-bg: #0d1117;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--es-bg);
+  --color-foreground: var(--es-text);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--es-bg);
+  color: var(--es-text);
+  font-family: var(--font-geist-sans), Arial, sans-serif;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--es-surface);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--es-border);
+  border-radius: 3px;
+}
+
+pre,
+code {
+  font-family: var(--font-geist-mono), "Menlo", "Monaco", monospace;
 }
