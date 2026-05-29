@@ -120,11 +120,12 @@ const WEBHOOK_EVENTS = [
 ];
 
 const TOC = [
-  { id: "authentication", label: "Authentication" },
-  { id: "sdk",            label: "SDK Installation" },
-  { id: "endpoints",      label: "Endpoint Reference" },
-  { id: "errors",         label: "Error Codes" },
-  { id: "webhooks",       label: "Webhooks" },
+  { id: "authentication",     label: "Authentication" },
+  { id: "sdk",                label: "SDK Installation" },
+  { id: "integration-modes",  label: "Integration Modes" },
+  { id: "endpoints",          label: "Endpoint Reference" },
+  { id: "errors",             label: "Error Codes" },
+  { id: "webhooks",           label: "Webhooks" },
 ];
 
 const TOKEN_SNIPPET = `curl -X POST https://api.elasticstage.com/v1/auth/token \\
@@ -299,7 +300,75 @@ export default function ApiReferencePage() {
           </div>
         </section>
 
-        {/* ── 3. Endpoint Reference ── */}
+        {/* ── 3. Integration Modes ── */}
+        <section className="space-y-4">
+          <SectionHeading
+            id="integration-modes"
+            title="Integration Modes"
+            subtitle="Three ways to integrate — choose based on your stack and how much UI control you need."
+          />
+
+          <div className="grid grid-cols-3 gap-4">
+            {[
+              {
+                mode: "Iframe Embed",
+                tag: "Recommended for web",
+                tagColor: "#22c55e",
+                description: "Drop one <iframe> tag into your page. elasticStage handles the full release creation UI inside it. Theme via URL parameters.",
+                bestFor: "Web platforms (SoundCloud, Bandcamp, Beatport)",
+                effort: "~1 hour",
+                snippet: `<iframe\n  src="https://api.elasticstage.com/embed\n    ?partner=soundcloud\n    &color=%23FF5500"\n  width="100%" height="600"\n  sandbox="allow-scripts allow-forms\n           allow-same-origin"\n/>`,
+              },
+              {
+                mode: "Headless API",
+                tag: "Full UI control",
+                tagColor: "#3b82f6",
+                description: "Call the REST endpoints directly and build your own release creation UI. Full control over design and flow.",
+                bestFor: "Partners with their own design system or enterprise tools",
+                effort: "Days–weeks depending on scope",
+                snippet: `// Build your own UI, call our API\nconst release = await client.releases.create({\n  format: 'vinyl_12',\n  type:   'ep',\n  title:  'Midnight Sessions EP',\n});`,
+              },
+              {
+                mode: "Mobile SDK",
+                tag: "Coming soon",
+                tagColor: "#737373",
+                description: "Native wrapper around the REST API for iOS, Android, React Native, and Flutter. iframes don't work in native apps.",
+                bestFor: "Mobile-first platforms and native apps",
+                effort: "—",
+                snippet: `// React Native (coming soon)\nimport { ElasticStageWidget }\n  from '@elasticstage/react-native';\n\n<ElasticStageWidget\n  partner="soundcloud"\n  color="#FF5500"\n/>`,
+              },
+            ].map(({ mode, tag, tagColor, description, bestFor, effort, snippet }) => (
+              <div key={mode} className="bg-[#1a1a1a] border border-[#262626] rounded-lg p-4 flex flex-col gap-3">
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-sm font-semibold text-white">{mode}</p>
+                  <span
+                    className="text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0"
+                    style={{ color: tagColor, background: tagColor + "18" }}
+                  >
+                    {tag}
+                  </span>
+                </div>
+                <p className="text-[12px] text-[#737373] leading-relaxed">{description}</p>
+                <pre className="text-[10px] font-mono text-[#a3a3a3] bg-[#0d1117] border border-[#262626] rounded-md p-3 overflow-x-auto leading-relaxed flex-1">
+                  <code>{snippet}</code>
+                </pre>
+                <div className="space-y-1 pt-1 border-t border-[#262626]">
+                  <p className="text-[11px] text-[#737373]"><span className="text-[#a3a3a3]">Best for:</span> {bestFor}</p>
+                  <p className="text-[11px] text-[#737373]"><span className="text-[#a3a3a3]">Integration effort:</span> {effort}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-[#0d1117] border border-[#262626] rounded-lg px-4 py-3">
+            <p className="text-[12px] text-[#a3a3a3] leading-relaxed">
+              <span className="text-white font-medium">All three modes share the same REST API.</span>{" "}
+              The iframe and mobile SDK are presentation layers on top of the same endpoints. If your stack or CSP policy blocks iframes, fall back to Headless API — no rebundling required.
+            </p>
+          </div>
+        </section>
+
+        {/* ── 4. Endpoint Reference ── */}
         <section className="space-y-4">
           <SectionHeading
             id="endpoints"
@@ -339,7 +408,7 @@ export default function ApiReferencePage() {
           ))}
         </section>
 
-        {/* ── 4. Error Codes ── */}
+        {/* ── 5. Error Codes ── */}
         <section className="space-y-4">
           <SectionHeading
             id="errors"
@@ -380,7 +449,7 @@ export default function ApiReferencePage() {
           </div>
         </section>
 
-        {/* ── 5. Webhooks ── */}
+        {/* ── 6. Webhooks ── */}
         <section className="space-y-4">
           <SectionHeading
             id="webhooks"
