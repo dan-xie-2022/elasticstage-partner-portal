@@ -177,10 +177,35 @@ API Gateway / BFF layer  ←  stable versioned contract (what the playground dem
 
 ## 7. What we would build next (beyond prototype)
 
-1. **Real webhook delivery** — turning a partner from "experimenting" to "committed" requires events flowing to their backend.
-2. **Stripe Connect-style revenue share settlement** — automated payouts, not just reporting.
-3. **Real OAuth 2.0 flow** — replace the mock API key with a proper auth handshake.
-4. **SDK publishing** — the `@elasticstage/sdk` fictional package becomes real.
+Organised by the platform roadmap (Foundation → Embedded partnerships → AI & agents).
+
+### Foundation — shared infra
+
+1. **Real OAuth 2.0 flow** — replace the mock API key with a proper client credentials handshake. Auth & identity is a Now item on the roadmap; the prototype only demonstrates it.
+2. **Event model implementation** — the `order.created { partner_id }` pipeline shown in the architecture needs real implementation: event bus, fan-out to revenue share attribution, partner webhooks, and analytics.
+3. **Real webhook delivery** — turning a partner from "experimenting" to "committed" requires events actually flowing to their backend. Includes HMAC-SHA256 signing, retry logic, and delivery logs.
+4. **SDK publishing** — the `@elasticstage/sdk` fictional package becomes real (Node.js and Python to start).
+5. **Sandbox environment** — a live, isolated environment partners point their own code at before going to production. The API Playground demonstrates the API surface; a sandbox lets partners run their actual integration code against real infrastructure safely.
+6. **Server-side HITL enforcement** — `confirmed: true` on `POST /releases/{id}/attach` is currently only validated in the UI. The backend must enforce it with an audit trail (who confirmed, when, via which partner).
+7. **AI & Agent infrastructure** — the shared infra layer required before any agentic flow can ship (Next on the roadmap): LLM orchestration, tool call routing, agent session management.
+8. **Localisation** — multi-language and multi-currency support for non-UK partners (Later on the roadmap).
+
+### Embedded partnerships
+
+9. **Self-serve partner onboarding** — the portal currently assumes an existing partner with credentials. A new partner (e.g. Beatport) needs a signup flow, API agreement acceptance, and automatic credential generation — without talking to anyone at elasticStage. This is the structural change that makes partner #10 cost as much as partner #2.
+10. **Stripe Connect-style revenue share settlement** — automated payouts to partners, not just reporting. Turns the dashboard from a vanity metric into a financial commitment.
+11. **Post-publish editing UI in the embed widget** — `PATCH /releases/{id}` exists in the API but the embed widget has no "manage release" path. A creator who published through SoundCloud can't update their release date through the widget.
+12. **Creator billing handoff** — when a creator first uses the embed on SoundCloud, they need to set up a billing relationship with elasticStage. This transition is currently unmodelled.
+13. **Mobile SDK** — iframe embeds don't work in native apps. A React Native / Flutter SDK is needed for mobile-first partners (Later on the roadmap, flagged in section 3.8).
+14. **1.2 Creation tool partnerships** — after Distributor (SoundCloud, Amuse), onboard creation tools: Suno (~2M paid subscribers), Splice. Same API, different embed context.
+15. **1.3 Streaming partnerships** — Spotify for Artists, YouTube creator tools (Later on the roadmap).
+16. **1.4 E-commerce partnerships** — Bandcamp, Beatport — artists already selling direct to fans (Later on the roadmap).
+
+### AI & agents
+
+17. **2.1 Agentic release flow** — the conversational 3-message release creation flow deliberately excluded from this prototype. Next on the roadmap; rides the same API endpoints.
+18. **2.2 AI fan store** — AI-powered discovery and purchasing on the fan side (Later on the roadmap).
+19. **2.3 External MCP** — exposing elasticStage tools to external AI agents (ChatGPT, Claude) via the Model Context Protocol, so any agent can orchestrate a release without a bespoke integration (Later on the roadmap).
 
 ---
 
