@@ -18,15 +18,14 @@ A developer-facing partner portal demonstrating how a music platform (SoundCloud
 
 ## Screens
 
-| Screen | Route | What it demonstrates |
+| Screen | Route | Purpose |
 |---|---|---|
-| Developer Console | `/` | Partner gets their API key, understands the auth model, copies a working code snippet |
-| API Playground | `/playground` | Stripe-style endpoint explorer — fill a form, hit Send, see the mock response and a copy-ready code snippet in Node.js / cURL / Python |
-| Widget Preview | `/widget-preview` | The embed live inside a mock SoundCloud artist page, with a real-time theme customiser and the one-line iframe snippet |
-| Partner Dashboard | `/dashboard` | Revenue share reporting, active releases attributed to SoundCloud, and webhook endpoint configuration |
-| API Reference | `/api-reference` | High-level reference: auth, SDK installation, full endpoint table, error codes, webhook event types and payloads |
-
-The embed widget (`/embed`) is a standalone page loaded inside the iframe on Screen 3. It walks through the full 5-step release creation flow (release details → metadata → tracks → artwork → publish) with a HITL confirmation gate on the irreversible attach step.
+| Developer Console | `/` | API key, dual auth model, quickstart snippet |
+| API Playground | `/playground` | 8 interactive Release endpoints, mock responses, code snippets |
+| Widget Preview | `/widget-preview` | Live embed in mock artist page, theme customiser, iframe snippet |
+| Partner Dashboard | `/dashboard` | Revenue reporting, active releases, webhook config |
+| API Reference | `/api-reference` | Auth model, SDK install, endpoint table, error codes, webhook events |
+| Embed Widget | `/embed` | 5-step release creation flow; HITL gate on irreversible attach step |
 
 ---
 
@@ -101,13 +100,14 @@ No environment variables required — all data is mocked.
 4. **Widget Preview page (Screen 3)** — the mock SoundCloud iframe is a visual demo, not a technical one. The API Playground already demonstrates the headless integration path, which is the real DX story. Keep headless, cut the iframe preview.
 5. **Mobile SDK integration** — iframe covers the majority of web partners. Mobile SDK adds significant build complexity for limited demo value; the headless API model covers any stack in the interim.
 
-**Build next (in dependency order):**
+**Build next — P1 (commercial blockers, in dependency order):**
 
 1. **Real OAuth 2.0 flow** — nothing goes to production without real partner identity. Every item below depends on it.
-2. **Server-side HITL enforcement** — `confirmed: true` on attach must be validated and audited server-side before any real commercial action is possible.
-3. **Event model** — the `order.created { partner_id }` pipeline is the backbone of webhooks, revenue attribution, and billing. Everything downstream depends on it.
-4. **Real webhook delivery** — what turns a partner from "experimenting" to "committed". Events flowing to SoundCloud's backend make the integration sticky.
+2. **Server-side HITL enforcement** — `confirmed: true` on attach must be validated and audited server-side before any real commercial action.
+3. **`partner_id` attribution + webhook trigger** — stamp every order with the originating partner, fire a direct `order.created` webhook to SoundCloud. Minimum viable attribution without a full event bus.
+4. **Real webhook delivery** — HMAC-signed, retried, logged. Turns a partner from "experimenting" to "committed".
+5. **Creator billing handoff** — when a creator first uses the embed, they need a billing relationship with elasticStage. Currently unmodelled; this is the conversion moment.
 
-Full dependency-ordered build list (12 items) in [DECISIONS.md → Section 7](./DECISIONS.md).
+P2 (scale), P3 (polish), and full dependency ordering in [DECISIONS.md → Section 7](./DECISIONS.md).
 
 **Test first:** Embed take-rate on SoundCloud — do creators actually click through and complete a release? Modelled at ~5% activation. Validate with a lightweight embed on one existing partner page before building the full self-serve portal.

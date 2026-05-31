@@ -178,30 +178,65 @@ API Gateway / BFF layer  ←  stable versioned contract (what the playground dem
 ---
 
 ## 7. What we would build next (beyond prototype)
+### P0 — V0 prototype (this repo)
+Everything below is mocked — no real backend, no real auth, no live API calls.
 
-Ordered by dependency — nothing lower in the list can ship without the items above it being in place.
+**Five screens, one standalone embed:**
+
+| Screen | Route | Purpose |
+|---|---|---|
+| Developer Console | `/` | API key, dual auth model, quickstart snippet |
+| API Playground | `/playground` | 8 interactive Release endpoints, mock responses, code snippets |
+| Widget Preview | `/widget-preview` | Live embed in mock artist page, theme customiser, iframe snippet |
+| Partner Dashboard | `/dashboard` | Revenue reporting, active releases, webhook config |
+| API Reference | `/api-reference` | Auth model, SDK install, endpoint table, error codes, webhook events |
+| Embed Widget | `/embed` | 5-step release creation flow; HITL gate on irreversible attach step |
+
+**What is deliberately excluded from V0:**
+- Real OAuth — shown as a concept on Screen 1, not implemented
+- Real webhook delivery — endpoint configuration UI exists in the dashboard; no actual delivery
+- Payment — not modelled; acknowledged as a known gap
+- AI/agentic flow — separate priority; excluded to keep the demo focused on the API/partnership DX
+
+---
+
+### P1 — Immediately after V0: core commercial viability
+All commercial blockers — without OAuth, HITL enforcement, the event model, webhooks, and billing handoff, no partner integration can go live safely. They're also sequentially dependent. Together they close the gap between "working demo" and "partner can actually go live."
 
 1. **Real OAuth 2.0 flow** — the critical unblocking dependency. Everything else requires real partner identity: revenue attribution, audit trails, sandbox credentials, SDK auth. The prototype only demonstrates this; nothing goes to production without it.
 
 2. **Server-side HITL enforcement** — must be in place before any real release can be attached. `confirmed: true` is currently UI-only. The backend needs to validate it, log who confirmed, when, and via which partner. Safety gate before any commercial action is real.
 
-3. **Event model implementation** — the `order.created { partner_id }` pipeline shown in the architecture. Needed before webhooks, revenue share, or billing attribution can function. Everything downstream depends on events being reliably produced and routed.
+3. **`partner_id` on the order record + simple webhook trigger** — for a first partner going live, you don't need a full event bus. You need `partner_id` stamped on every order created through the embed, and a direct webhook call to SoundCloud on `order.created`. This is the minimum viable attribution and notification layer — enough to prove the integration works and attribute revenue, without the complexity of a formal event model.
 
-4. **Real webhook delivery** — depends on the event model. Turns partner integrations from read-only to reactive — SoundCloud's backend gets notified when a creator places an order. Includes HMAC-SHA256 signing, retry logic (3 attempts, exponential backoff), and delivery logs in the dashboard.
+4. **Real webhook delivery** — depends on `partner_id` attribution. Turns partner integrations from read-only to reactive — SoundCloud's backend gets notified when a creator places an order. Includes HMAC-SHA256 signing, retry logic (3 attempts, exponential backoff), and delivery logs in the dashboard.
 
-5. **Creator billing handoff** — depends on OAuth (creator identity) and the event model (billing triggers). When a creator first uses the embed on SoundCloud, they need to set up a billing relationship with elasticStage. Currently unmodelled — this is the moment the embed either converts or loses the creator.
+5. **Creator billing handoff** — depends on OAuth (creator identity). When a creator first uses the embed on SoundCloud, they need to set up a billing relationship with elasticStage. Currently unmodelled — this is the moment the embed either converts or loses the creator.
 
-6. **Stripe Connect-style revenue share settlement** — depends on OAuth + event model. Automated payouts to partners, not just reporting. Turns the Partner Dashboard from a vanity metric into a financial commitment that makes the partnership sticky.
+---
 
-7. **Sandbox environment** — depends on OAuth being real. Partners need a live, isolated environment to point their own code at before going to production. The API Playground shows the surface; the sandbox lets them run their actual integration safely.
+### P2 — Next for scale: turn a pilot into a platform
+All about removing the manual bottleneck from partner onboarding. Sandbox → SDK → self-serve onboarding is the chain that makes partner #10 as cheap as partner
+These are what make the API self-serve and partner growth non-linear. Without them, every new partner still requires manual onboarding effort.
 
-8. **SDK publishing** — depends on OAuth + sandbox. The `@elasticstage/sdk` package becomes real (Node.js and Python first). Without a sandbox and real auth, the SDK has nowhere meaningful to point.
+6. **Sandbox environment** — depends on OAuth being real. Partners need a live, isolated environment to point their own code at before going to production. The API Playground shows the surface; the sandbox lets them run their actual integration safely.
 
-9. **Self-serve partner onboarding** — depends on OAuth + sandbox + SDK. A new partner needs a signup flow, API agreement acceptance, and automatic credential generation without talking to anyone at elasticStage. This is the structural change that makes partner #10 cost the same as partner #2.
+7. **SDK publishing** — depends on OAuth + sandbox. The `@elasticstage/sdk` package becomes real (Node.js and Python first). Without a sandbox and real auth, the SDK has nowhere meaningful to point.
 
-10. **Post-publish editing UI in the embed widget** — relatively independent once OAuth is in place. `PATCH /releases/{id}` exists in the API but the embed widget has no "manage release" path. A creator who published through SoundCloud cannot update their release date through the widget.
+8. **Self-serve partner onboarding** — depends on OAuth + sandbox + SDK. A new partner needs a signup flow, API agreement acceptance, and automatic credential generation without talking to anyone at elasticStage. This is the structural change that makes partner #10 cost the same as partner #2.
 
-11. **Mobile SDK** — depends on OAuth + SDK publishing. iframe embeds don't work in native apps. A React Native / Flutter SDK wraps the same REST API for mobile-first partners.
+9. **Formal event model** — once you have 3+ partners each listening to different event types, a direct webhook trigger per partner becomes unmanageable. A proper event bus (schema registry, reliable fan-out, event replay) is what makes the architecture scale. Builds on the `partner_id` attribution from P1.
+
+10. **Stripe Connect-style revenue share settlement** — depends on OAuth + event model. Automated payouts to partners, not just reporting. Turns the Partner Dashboard from a vanity metric into a financial commitment that makes the partnership sticky.
+
+---
+
+### P3 — Postpone or cut: valuable but not on the critical path
+These improve the product but don't block any partner from going live or scaling. The post-publish UI matters for creator experience but the underlying API already works. Mobile SDK only becomes relevant once you have web partners successfully live and if our partners have mobile based users.
+
+11. **Post-publish editing UI in the embed widget** — relatively independent once OAuth is in place. `PATCH /releases/{id}` exists in the API but the embed widget has no "manage release" path. A creator who published through SoundCloud cannot update their release date through the widget. The API already supports it; the widget UI is a nice-to-have.
+
+12. **Mobile SDK** — depends on OAuth + SDK publishing. iframe embeds don't work in native apps. A React Native / Flutter SDK wraps the same REST API for mobile-first partners. iframe covers the majority of web partners; mobile-first is a later-stage concern that adds significant build complexity for limited near-term value.
 
 
 ---
