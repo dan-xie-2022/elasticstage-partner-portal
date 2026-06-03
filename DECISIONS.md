@@ -211,7 +211,11 @@ All commercial blockers — without OAuth, HITL enforcement, the event model, we
 
 4. **Real webhook delivery** — depends on `partner_id` attribution. Turns partner integrations from read-only to reactive — SoundCloud's backend gets notified when a creator places an order. Includes HMAC-SHA256 signing, retry logic (3 attempts, exponential backoff), and delivery logs in the dashboard.
 
-5. **Creator billing handoff** — depends on OAuth (creator identity). When a creator hits Publish for the first time, elasticStage needs to charge them but has no billing details on file. **Decision: lazy handoff.** Do not interrupt the flow early — let the creator complete all 5 steps first, then trigger the elasticStage billing setup only at the payment moment. By Step 5 the creator has invested time filling in release details, tracks, and artwork; that investment makes them far more likely to push through the friction. Four things required: (a) **identity matching** — check if the creator's SoundCloud email already has an elasticStage account; if yes, link silently; if no, trigger signup; (b) **pre-fill from SoundCloud** — SoundCloud passes the creator's name and email so the signup form is mostly done for them; (c) **draft persistence** — save the release server-side so a recovery email can bring them back if they abandon the billing step; (d) **return URL** — after billing setup, redirect straight back to the publish confirmation screen, not a generic dashboard.
+5. **Creator billing handoff** — depends on OAuth (creator identity). When a creator hits Publish for the first time, elasticStage needs to charge them but has no billing details on file. **Decision: lazy handoff** — let the creator complete all 5 steps first, trigger billing setup only at the payment moment. By Step 5 their investment in the flow makes them far more likely to push through the friction.
+   - **Identity matching** — check if SoundCloud email already has an elasticStage account; link silently if yes, trigger signup if no
+   - **Pre-fill from SoundCloud** — pass creator name and email so the signup form is mostly complete
+   - **Draft persistence** — save the release server-side; send a recovery email if they abandon at billing
+   - **Return URL** — redirect back to the publish confirmation screen after billing setup, not a generic dashboard
 
 ---
 
