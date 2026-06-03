@@ -238,11 +238,13 @@ These are what make the API self-serve and partner growth non-linear. Without th
 ---
 
 ### P3 — Postpone or cut: valuable but not on the critical path
-These improve the product but don't block any partner from going live or scaling. The post-publish UI matters for creator experience but the underlying API already works. Mobile SDK only becomes relevant once you have web partners successfully live and if our partners have mobile based users.
+These improve the product but don't block any partner from going live or scaling.
 
-12. **Post-publish editing UI in the embed widget** — relatively independent once OAuth is in place. `PATCH /releases/{id}` exists in the API but the embed widget has no "manage release" path. A creator who published through SoundCloud cannot update their release date through the widget. The API already supports it; the widget UI is a nice-to-have.
+12. **Agentic release flow** — depends on SDK (P2 item 7) and server-side HITL enforcement (P1 item 2). An AI agent calls the same REST endpoints as the form — no API changes required. A creator on SoundCloud could say "release my album on vinyl" and the agent handles the 5-step flow, pausing at the attach step for explicit human confirmation. The HITL gate is the critical safety layer here: server-side enforcement ensures the agent cannot bypass the irreversible attach action regardless of how it calls the API. Strong P3 — strategically important differentiator once partners are live, but not on the critical path to getting them there.
 
-13. **Mobile SDK** — depends on OAuth + SDK publishing. iframe embeds don't work in native apps. A React Native / Flutter SDK wraps the same REST API for mobile-first partners. iframe covers the majority of web partners; mobile-first is a later-stage concern that adds significant build complexity for limited near-term value.
+13. **Post-publish editing UI in the embed widget** — relatively independent once OAuth is in place. `PATCH /releases/{id}` exists in the API but the embed widget has no "manage release" path. A creator who published through SoundCloud cannot update their release date through the widget. The API already supports it; the widget UI is a nice-to-have.
+
+14. **Mobile SDK** — depends on OAuth + SDK publishing. iframe embeds don't work in native apps. A React Native / Flutter SDK wraps the same REST API for mobile-first partners. iframe covers the majority of web partners; mobile-first is a later-stage concern that adds significant build complexity for limited near-term value.
 
 
 ---
