@@ -227,16 +227,18 @@ These are what make the API self-serve and partner growth non-linear. Without th
 
 9. **Formal event model** — once you have 3+ partners each listening to different event types, a direct webhook trigger per partner becomes unmanageable. A proper event bus (schema registry, reliable fan-out, event replay) is what makes the architecture scale. Builds on the `partner_id` attribution from P1.
 
-10. **Stripe Connect-style revenue share settlement** — depends on OAuth + event model. Automated payouts to partners, not just reporting. Turns the Partner Dashboard from a vanity metric into a financial commitment that makes the partnership sticky.
+10. **Alerting and monitoring** — coupled to the event model; you cannot operate a multi-partner event bus safely without visibility into it. Three things are required: (a) per-partner webhook delivery rate alert (fire if success rate drops below 95% over 10 minutes), (b) API error rate sliced by `partner_id` so a broken integration for one partner doesn't hide in the aggregate, (c) sandbox-to-production event leakage alert — a misrouted sandbox event triggering a real order is a data integrity failure. Self-serve onboarding also means failures are no longer surfaced by a partner calling you; monitoring replaces that human signal.
+
+11. **Stripe Connect-style revenue share settlement** — depends on OAuth + event model. Automated payouts to partners, not just reporting. Turns the Partner Dashboard from a vanity metric into a financial commitment that makes the partnership sticky.
 
 ---
 
 ### P3 — Postpone or cut: valuable but not on the critical path
 These improve the product but don't block any partner from going live or scaling. The post-publish UI matters for creator experience but the underlying API already works. Mobile SDK only becomes relevant once you have web partners successfully live and if our partners have mobile based users.
 
-11. **Post-publish editing UI in the embed widget** — relatively independent once OAuth is in place. `PATCH /releases/{id}` exists in the API but the embed widget has no "manage release" path. A creator who published through SoundCloud cannot update their release date through the widget. The API already supports it; the widget UI is a nice-to-have.
+12. **Post-publish editing UI in the embed widget** — relatively independent once OAuth is in place. `PATCH /releases/{id}` exists in the API but the embed widget has no "manage release" path. A creator who published through SoundCloud cannot update their release date through the widget. The API already supports it; the widget UI is a nice-to-have.
 
-12. **Mobile SDK** — depends on OAuth + SDK publishing. iframe embeds don't work in native apps. A React Native / Flutter SDK wraps the same REST API for mobile-first partners. iframe covers the majority of web partners; mobile-first is a later-stage concern that adds significant build complexity for limited near-term value.
+13. **Mobile SDK** — depends on OAuth + SDK publishing. iframe embeds don't work in native apps. A React Native / Flutter SDK wraps the same REST API for mobile-first partners. iframe covers the majority of web partners; mobile-first is a later-stage concern that adds significant build complexity for limited near-term value.
 
 
 ---

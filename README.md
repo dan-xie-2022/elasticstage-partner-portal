@@ -108,6 +108,6 @@ No environment variables required — all data is mocked.
 4. **Real webhook delivery** — HMAC-signed, retried, logged. Turns a partner from "experimenting" to "committed".
 5. **Creator billing handoff** — when a creator first uses the embed, they need a billing relationship with elasticStage. Currently unmodelled; this is the conversion moment.
 
-P2 (scale), P3 (polish), and full dependency ordering in [DECISIONS.md → Section 7](./DECISIONS.md).
+P2 adds sandbox, SDK publishing, self-serve onboarding, formal event model, alerting/monitoring, and revenue settlement. P3 (polish) and full dependency ordering in [DECISIONS.md → Section 7](./DECISIONS.md).
 
 **Test first:** Embed take-rate on SoundCloud — do creators actually click through and complete a release? Modelled at ~5% activation. Validate with a lightweight embed on one existing partner page before building the full self-serve portal.
