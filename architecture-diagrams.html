@@ -78,7 +78,7 @@ flowchart TD
         DB[(MySQL / MariaDB)]
         WH[Webhook Service\nHMAC-signed · retried · logged]
         Billing[Creator Billing Handoff]
-        Dash[Partner Dashboard]
+        Dash[Internal Partner Dashboard]
     end
 
     Creator -->|visits| SC
@@ -126,7 +126,7 @@ flowchart TD
         EventBus[Event Bus\nfan-out · replay]:::new
         WH[Webhook Service]:::existing
         Settlement[Revenue Settlement]:::new
-        Dash[Partner Dashboard]:::existing
+        Dash[Internal Partner Dashboard]:::existing
         Monitor[Alerting & Monitoring]:::new
     end
 
@@ -171,46 +171,6 @@ C4Context
     Rel(elasticStage, oauth, "Delegates auth to")
     Rel(elasticStage, payment, "Triggers billing via")
     Rel(elasticStage, soundcloud, "Sends order.created webhooks to")
-    </div>
-  </div>
-
-  <div class="diagram-block">
-    <h3>C4 — Level 2: Container</h3>
-    <p>The major deployable components inside elasticStage and how they communicate. For engineers.</p>
-    <div class="mermaid">
-C4Container
-    title elasticStage — Container Diagram
-
-    Person(creator, "Creator", "Musician creating a release")
-    Person(partnerDev, "Partner Developer", "Integrating via API")
-
-    System_Ext(soundcloud, "SoundCloud Platform", "Hosts the embed iframe, receives webhooks")
-    System_Ext(oauth, "OAuth Provider", "Issues and validates tokens")
-
-    System_Boundary(es, "elasticStage") {
-        Container(portal, "Partner Portal", "Next.js / Vercel", "Developer Console, API Playground, API Reference")
-        Container(widget, "Embed Widget", "Next.js /embed", "5-step release creation flow with HITL gate")
-        Container(gateway, "API Gateway", "Off-the-shelf", "Versioned, rate-limited entry point for all API calls")
-        Container(auth, "Auth Service", "OAuth 2.0", "Issues and validates partner and creator tokens")
-        Container(monolith, "Laravel Monolith", "PHP / Laravel", "Core business logic: releases, orders, revenue attribution")
-        ContainerDb(db, "Database", "MySQL / MariaDB", "Releases, orders, partners, creators")
-        Container(webhook, "Webhook Service", "", "HMAC-signed, retried event delivery to partner backends")
-        Container(dashboard, "Partner Dashboard", "Next.js /dashboard", "Revenue reporting, active releases, webhook config")
-    }
-
-    Rel(creator, soundcloud, "Visits")
-    Rel(soundcloud, widget, "Loads via iframe")
-    Rel(partnerDev, portal, "Reads docs, tests endpoints")
-    Rel(partnerDev, gateway, "Calls REST API")
-    Rel(widget, gateway, "API calls")
-    Rel(portal, gateway, "Playground calls")
-    Rel(gateway, auth, "Validates token")
-    Rel(auth, oauth, "Delegates to")
-    Rel(gateway, monolith, "Routes requests")
-    Rel(monolith, db, "Reads / writes")
-    Rel(monolith, webhook, "Fires order.created")
-    Rel(webhook, soundcloud, "POST notification")
-    Rel(monolith, dashboard, "Revenue attribution")
     </div>
   </div>
 
