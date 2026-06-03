@@ -66,7 +66,7 @@ flowchart TD
         DB[(MySQL / MariaDB)]
         WH[Webhook Service\nHMAC-signed · retried · logged]
         Billing[Creator Billing Handoff]
-        Dash[Partner Dashboard]
+        Dash[Internal Partner Dashboard]
     end
 
     Creator -->|visits| SC
@@ -109,7 +109,7 @@ flowchart TD
         EventBus[Event Bus\nfan-out · replay]:::new
         WH[Webhook Service]:::existing
         Settlement[Revenue Settlement]:::new
-        Dash[Partner Dashboard]:::existing
+        Dash[Internal Partner Dashboard]:::existing
         Monitor[Alerting & Monitoring]:::new
     end
 
