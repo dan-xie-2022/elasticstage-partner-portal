@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>elasticStage Architecture Diagrams</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    body {
+      background: #0f172a;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 { font-size: 1.4rem; color: #94a3b8; font-weight: 500; margin-bottom: 4px; }
+    h2 { font-size: 1.1rem; color: #64748b; font-weight: 400; margin-top: 0; }
+    .diagram-block {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 48px;
+    }
+    .diagram-block h3 {
+      font-size: 1rem;
+      color: #94a3b8;
+      margin: 0 0 8px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+    }
+    .diagram-block p {
+      color: #64748b;
+      margin: 0 0 24px 0;
+      font-size: 0.875rem;
+    }
+    .legend {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 24px;
+      font-size: 0.8rem;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+    .dot-new { background: #1d4ed8; }
+    .dot-existing { background: #374151; border: 1px solid #4b5563; }
+    .mermaid { display: flex; justify-content: center; }
+  </style>
+</head>
+<body>
+  <h1>elasticStage Partner Portal</h1>
+  <h2>Architecture Blueprint</h2>
+
+  <div class="diagram-block">
+    <h3>P1 — One partner live, commercial blockers closed</h3>
+    <p>Real OAuth, server-enforced HITL gate, direct webhook to SoundCloud, creator billing handoff.</p>
+    <div class="mermaid">
+flowchart TD
+    Creator([Creator])
+    SC[SoundCloud Platform]
+    SCB[SoundCloud Backend]
+
+    subgraph elasticStage
+        Widget[Embed Widget]
+        GW[API Gateway]
+        Auth[OAuth 2.0\nAuth Service]
+        HITL{HITL Gate\nserver-enforced}
+        Monolith[Laravel Monolith]
+        DB[(MySQL / MariaDB)]
+        WH[Webhook Service\nHMAC-signed · retried · logged]
+        Billing[Creator Billing Handoff]
+        Dash[Partner Dashboard]
+    end
+
+    Creator -->|visits| SC
+    SC -->|loads iframe| Widget
+    Widget -->|OAuth token| GW
+    GW -->|validates| Auth
+    GW -->|attach request| HITL
+    HITL -->|confirmed: true only| Monolith
+    Monolith --> DB
+    Monolith -->|order.created + partner_id| WH
+    WH -->|POST| SCB
+    Monolith -->|first-time creator| Billing
+    Monolith -->|revenue attribution| Dash
+    </div>
+  </div>
+
+  <div class="diagram-block">
+    <h3>P2 — Multiple partners, self-serve, event bus</h3>
+    <p>Everything from P1, plus the components below.</p>
+    <div class="legend">
+      <div class="legend-item"><div class="dot dot-existing"></div> Carried from P1</div>
+      <div class="legend-item"><div class="dot dot-new"></div> New in P2</div>
+    </div>
+    <div class="mermaid">
+flowchart TD
+    classDef new fill:#1d4ed8,stroke:#1e40af,color:#fff,stroke-width:2px
+    classDef existing fill:#374151,stroke:#4b5563,color:#fff
+
+    Creator([Creator]):::existing
+    Partners[N Partners\nSoundCloud · Partner B · ...]:::new
+    PartnerBackends[Partner Backends\nwebhook endpoints]:::new
+
+    subgraph devtools [Developer Tools — new in P2]
+        Onboarding[Self-Serve Onboarding]:::new
+        SDK[SDK + Sandbox\nNode.js · Python]:::new
+    end
+
+    subgraph elasticStage
+        Widget[Embed Widget]:::existing
+        GW[API Gateway\nversioned · rate-limited]:::existing
+        Auth[OAuth 2.0\nAuth Service]:::existing
+        HITL{HITL Gate}:::existing
+        Monolith[Laravel Monolith]:::existing
+        DB[(MySQL / MariaDB)]:::existing
+        EventBus[Event Bus\nfan-out · replay]:::new
+        WH[Webhook Service]:::existing
+        Settlement[Revenue Settlement]:::new
+        Dash[Partner Dashboard]:::existing
+        Monitor[Alerting & Monitoring]:::new
+    end
+
+    Creator --> Partners
+    Onboarding -->|self-serve credentials| Partners
+    Partners -->|iframe / headless| Widget
+    SDK -.->|test calls| GW
+    Widget -->|API calls| GW
+    GW -->|validates| Auth
+    GW -->|attach| HITL
+    HITL -->|confirmed| Monolith
+    Monolith --> DB
+    Monolith -->|events| EventBus
+    EventBus -->|fan-out| WH
+    WH -->|POST to all| PartnerBackends
+    WH --> Monitor
+    EventBus --> Monitor
+    Monolith --> Settlement
+    Monolith --> Dash
+    </div>
+  </div>
+
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+  </script>
+</body>
+</html>

@@ -46,17 +46,89 @@ Full rationale in [DECISIONS.md](./DECISIONS.md). Summary:
 
 ---
 
-## Architecture (condensed)
+## Architecture
 
+### P1 — One partner live, commercial blockers closed
+Real OAuth, server-enforced HITL gate, direct webhook to SoundCloud, creator billing handoff.
+
+```mermaid
+flowchart TD
+    Creator([Creator])
+    SC[SoundCloud Platform]
+    SCB[SoundCloud Backend]
+
+    subgraph elasticStage
+        Widget[Embed Widget]
+        GW[API Gateway]
+        Auth[OAuth 2.0\nAuth Service]
+        HITL{HITL Gate\nserver-enforced}
+        Monolith[Laravel Monolith]
+        DB[(MySQL / MariaDB)]
+        WH[Webhook Service\nHMAC-signed · retried · logged]
+        Billing[Creator Billing Handoff]
+        Dash[Partner Dashboard]
+    end
+
+    Creator -->|visits| SC
+    SC -->|loads iframe| Widget
+    Widget -->|OAuth token| GW
+    GW -->|validates| Auth
+    GW -->|attach request| HITL
+    HITL -->|confirmed: true only| Monolith
+    Monolith --> DB
+    Monolith -->|order.created + partner_id| WH
+    WH -->|POST| SCB
+    Monolith -->|first-time creator| Billing
+    Monolith -->|revenue attribution| Dash
 ```
-SoundCloud site
-  └── <iframe src="https://api.elasticstage.com/embed?partner=soundcloud&color=...">
-          └── elasticStage embed widget (/embed)
 
-API Gateway / BFF  ←  stable versioned contract (what the playground demos)
-  └── Laravel monolith (MySQL/MariaDB)  ←  existing, unchanged
-        └── event: order.created { partner_id }
-              └── revenue share attribution → partner dashboard
+### P2 — Multiple partners, self-serve, event bus
+Blue = new in P2. Grey = carried from P1.
+
+```mermaid
+flowchart TD
+    classDef new fill:#1d4ed8,stroke:#1e40af,color:#fff,stroke-width:2px
+    classDef existing fill:#374151,stroke:#4b5563,color:#fff
+
+    Creator([Creator]):::existing
+    Partners[N Partners\nSoundCloud · Partner B · ...]:::new
+    PartnerBackends[Partner Backends\nwebhook endpoints]:::new
+
+    subgraph devtools [Developer Tools — new in P2]
+        Onboarding[Self-Serve Onboarding]:::new
+        SDK[SDK + Sandbox\nNode.js · Python]:::new
+    end
+
+    subgraph elasticStage
+        Widget[Embed Widget]:::existing
+        GW[API Gateway\nversioned · rate-limited]:::existing
+        Auth[OAuth 2.0\nAuth Service]:::existing
+        HITL{HITL Gate}:::existing
+        Monolith[Laravel Monolith]:::existing
+        DB[(MySQL / MariaDB)]:::existing
+        EventBus[Event Bus\nfan-out · replay]:::new
+        WH[Webhook Service]:::existing
+        Settlement[Revenue Settlement]:::new
+        Dash[Partner Dashboard]:::existing
+        Monitor[Alerting & Monitoring]:::new
+    end
+
+    Creator --> Partners
+    Onboarding -->|self-serve credentials| Partners
+    Partners -->|iframe / headless| Widget
+    SDK -.->|test calls| GW
+    Widget -->|API calls| GW
+    GW -->|validates| Auth
+    GW -->|attach| HITL
+    HITL -->|confirmed| Monolith
+    Monolith --> DB
+    Monolith -->|events| EventBus
+    EventBus -->|fan-out| WH
+    WH -->|POST to all| PartnerBackends
+    WH --> Monitor
+    EventBus --> Monitor
+    Monolith --> Settlement
+    Monolith --> Dash
 ```
 
 **Build vs buy:** Auth (managed OAuth), API gateway (off-the-shelf). Embed UI and attribution logic are built — these are the differentiated surfaces.
